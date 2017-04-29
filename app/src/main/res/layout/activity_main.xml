@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="pnzio.gpsassignment.MainActivity">
+
+    <Button
+        android:id="@+id/btn_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start" />
+
+    <Button
+        android:id="@+id/btn_finish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_start"
+        android:text="Finish" />
+
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_finish"
+        android:text="Reset" />
+
+    <TextView
+        android:id="@+id/speedView"
+        android:layout_width="wrap_content"
+        android:text="current speed"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_reset">
+    </TextView>
+
+    <TextView
+        android:id="@+id/averageSpeedView"
+        android:layout_width="wrap_content"
+        android:text="average speed"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/speedView">
+    </TextView>
+
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="wrap_content"
+        android:text="distance ..."
+        android:layout_height="wrap_content"
+        android:layout_below="@id/averageSpeedView">
+    </TextView>
+
+    <TextView
+        android:id="@+id/results"
+        android:layout_width="wrap_content"
+        android:text="number of results"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/distance">
+    </TextView>
+
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/results"
+        android:id="@+id/cmtime"/>
+</RelativeLayout>
