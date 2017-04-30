@@ -5,31 +5,53 @@
 
     <TextView
         android:id="@+id/userDetailsSpeed"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_below="@id/speedView">
     </TextView>
 
     <TextView
         android:id="@+id/userDetailsDistance"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_below="@id/userDetailsSpeed">
     </TextView>
 
     <TextView
         android:id="@+id/userDetailsTime"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_below="@id/userDetailsDistance">
     </TextView>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_below="@id/userDetailsTime"
         android:text="Back"
         android:layout_margin="20dp"
         android:id="@+id/goBack"/>
 
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <pnzio.gpsassignment.GraphView
+            android:id="@+id/barChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/orange"
+            android:padding="20dp"/>
+
+        <TextView
+            android:id="@+id/graphTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/barChart"
+            android:text="Each bar represents 1 KM"
+            android:gravity="center"/>
+    </RelativeLayout>
 </LinearLayout>

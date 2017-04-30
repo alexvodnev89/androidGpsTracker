@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,9 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private Location loc = null;
     private Double distanceTraveled = 0.0;
 
-    int number;
-
-    private TextView currentSpeed,averageSpeed,numberResults,distance;
+    private TextView currentSpeed,averageSpeed,distance;
     private Button startButton,finishButton,resetButton;
     private Chronometer cm;
 
@@ -39,14 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userActivities = new ArrayList<UserActivityDetails>();
-
         currentSpeed = (TextView)findViewById(R.id.speedView);
         averageSpeed = (TextView)findViewById(R.id.averageSpeedView);
         distance = (TextView)findViewById(R.id.distance);
-        numberResults = (TextView)findViewById(R.id.results);
-
         cm = (Chronometer) findViewById(R.id.cmtime);
-
         startButton = (Button)findViewById(R.id.btn_start);
         finishButton = (Button)findViewById(R.id.btn_finish);
         resetButton = (Button)findViewById(R.id.btn_reset);
@@ -80,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                              String.format("%.2f", distanceTraveled/1000) + " km";
 
 
-                    number++;
 
                     // Saving time in seconds, (to be user in graphs)
                     long elapsedMillis = SystemClock.elapsedRealtime() - cm.getBase();
@@ -90,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                     currentSpeed.setText("Current speed : " + (int) Math.round(s) + " km/hour");
                     averageSpeed.setText("Average speed: " + (int) Math.round(tempSpeed) + " km/hour");
                     distance.setText("Distance : " + shownDistance);
-                    numberResults.setText("results : " + number);
 
                     loc = location;
                     userActivities.add(user);
@@ -104,7 +97,9 @@ public class MainActivity extends AppCompatActivity {
             public void onProviderEnabled(String s) {}
 
             @Override
-            public void onProviderDisabled(String s) {}
+            public void onProviderDisabled(String s) {
+                resetTextFields();
+            }
         };
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,16 +151,17 @@ public class MainActivity extends AppCompatActivity {
     }
     public void reset(){
         working=false;
-        number = 0;
-        currentSpeed.setText("current ...");
-        averageSpeed.setText("averageSpeed");
-        cm.setText("Time ...");
-        numberResults.setText("results : " + number);
+        resetTextFields();
         cm.stop();
-        cm.setText(" ");
         userActivities.removeAll(userActivities);
         distanceTraveled = 0.0;
-        distance.setText(" distance");
+        loc = null;
+    }
+    public void resetTextFields(){
+        currentSpeed.setText(R.string.currentSpeed);
+        averageSpeed.setText(R.string.averageSpeed);
+        distance.setText(R.string.distance);
+        cm.setText("00:00");
     }
     public double getAverageSpeed(){
         double result = 0;

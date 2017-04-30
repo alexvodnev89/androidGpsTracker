@@ -29,7 +29,7 @@
     <TextView
         android:id="@+id/speedView"
         android:layout_width="wrap_content"
-        android:text="current speed"
+        android:text="@string/currentSpeed"
         android:layout_height="wrap_content"
         android:layout_below="@id/btn_reset">
     </TextView>
@@ -37,7 +37,7 @@
     <TextView
         android:id="@+id/averageSpeedView"
         android:layout_width="wrap_content"
-        android:text="average speed"
+        android:text="@string/averageSpeed"
         android:layout_height="wrap_content"
         android:layout_below="@id/speedView">
     </TextView>
@@ -45,22 +45,14 @@
     <TextView
         android:id="@+id/distance"
         android:layout_width="wrap_content"
-        android:text="distance ..."
+        android:text="@string/distance"
         android:layout_height="wrap_content"
         android:layout_below="@id/averageSpeedView">
-    </TextView>
-
-    <TextView
-        android:id="@+id/results"
-        android:layout_width="wrap_content"
-        android:text="number of results"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/distance">
     </TextView>
 
     <Chronometer
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/results"
+        android:layout_below="@+id/distance"
         android:id="@+id/cmtime"/>
 </RelativeLayout>

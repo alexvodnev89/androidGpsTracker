@@ -2,7 +2,6 @@ package pnzio.gpsassignment;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,8 +14,9 @@ import java.util.ArrayList;
 
 public class UserActivity extends Activity {
     Button backbtn;
-    TextView speedView,distanceView,timeView;
+    TextView speedView,distanceView,timeView,graphTextView;
     ArrayList<Integer> userKmInfo;
+    GraphView gv;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,8 @@ public class UserActivity extends Activity {
         speedView = (TextView)findViewById(R.id.userDetailsSpeed);
         distanceView = (TextView)findViewById(R.id.userDetailsDistance);
         timeView = (TextView)findViewById(R.id.userDetailsTime);
+        graphTextView = (TextView)findViewById(R.id.graphTextView);
+        gv = (GraphView)findViewById(R.id.barChart);
 
         Bundle data = getIntent().getExtras();
         int speed = data.getInt("averageSpeed");
@@ -34,20 +36,30 @@ public class UserActivity extends Activity {
         userKmInfo = data.getIntegerArrayList("graphArray");
 
         if(userKmInfo != null) {
-            Log.d("UserActivity", "fsfsffdsAAAAAAAAAAAAA" + userKmInfo.size());
+            Integer[] dataArray = (Integer[]) userKmInfo.toArray(new Integer[userKmInfo.size()]);
+            gv.setCoordinates(dataArray);
+        }
+        else{
+            userKmInfo = new ArrayList<>();
+            Integer[] dataArray = (Integer[]) userKmInfo.toArray(new Integer[userKmInfo.size()]);
+            gv.setCoordinates(dataArray);
         }
 
-        speedView.setText("Average user speed : " + speed);
-        distanceView.setText("Distance : " + dist);
-        timeView.setText("Total time is: " + time + " seconds");
+        if(speed == 0)
+            speedView.setText(R.string.averageSpeed);
+        else
+            speedView.setText("Average user speed : " + speed);
 
 
+        if(dist != null)
+            distanceView.setText("Distance : " + dist);
+        else
+            distanceView.setText(R.string.distance);
 
-
-
-
-
-
+        if(time != null)
+            timeView.setText("Total time is: " + time + " seconds");
+        else
+            timeView.setText("Total time is: 00:00");
 
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
