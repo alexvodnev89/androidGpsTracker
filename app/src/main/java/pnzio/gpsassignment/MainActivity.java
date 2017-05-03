@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -12,21 +11,22 @@ import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
 
+    // Variables
     private ArrayList<UserActivityDetails> userActivities;
-    public boolean working = false;
+    private boolean working;
     private LocationManager lm;
-    private Location loc = null;
-    private Double distanceTraveled = 0.0;
+    private Location loc;
+    private Double distanceTraveled;
 
     private TextView currentSpeed,averageSpeed,distance;
     private Button startButton,finishButton,resetButton;
@@ -37,7 +37,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialising variables
+        working = false;
+        distanceTraveled = 0.0;
         userActivities = new ArrayList<UserActivityDetails>();
+        lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        // Initialising Views, Buttons and Cgronometer
         currentSpeed = (TextView)findViewById(R.id.speedView);
         averageSpeed = (TextView)findViewById(R.id.averageSpeedView);
         distance = (TextView)findViewById(R.id.distance);
@@ -46,13 +53,17 @@ public class MainActivity extends AppCompatActivity {
         finishButton = (Button)findViewById(R.id.btn_finish);
         resetButton = (Button)findViewById(R.id.btn_reset);
 
-        lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-
+        /* Initialising Location Listener, declaring it to be final as it is then
+        accessed within inner class. */
         final LocationListener ll = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 if(location != null){
 
+                    /* New instance of UserActivityDetails that will keep all information
+                    about the current location as well as distance traveled so far and time
+                    passed by
+                    */
                     UserActivityDetails user = new UserActivityDetails();
                     user.setLongt(location.getLongitude());
                     user.setLangt(location.getLatitude());
@@ -85,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     averageSpeed.setText("Average speed: " + (int) Math.round(tempSpeed) + " km/hour");
                     distance.setText("Distance : " + shownDistance);
 
+                    // Resetting location to current location
                     loc = location;
                     userActivities.add(user);
                 }
@@ -101,27 +113,47 @@ public class MainActivity extends AppCompatActivity {
                 resetTextFields();
             }
         };
+
+        /*
+        Adding a listener to a start button. If app is running, a corresponding message
+        is shown to the user. If not, start tracking movement and start Chronometer.
+         */
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cm.setBase(SystemClock.elapsedRealtime());
-                cm.start();
-                startTracking(ll);
-                working=true;
+                if(!working){
+                    cm.setBase(SystemClock.elapsedRealtime());
+                    cm.start();
+                    trackingON(ll);
+                    working=true;
+                }else{
+                    Toast.makeText(MainActivity.this,R.string.appRunning,Toast.LENGTH_LONG).show();
+                }
+
             }
         });
+        /*
+        Adding a listener to a reset button. Stops tracking and resets all fields and variables.
+         */
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopTracking(ll);
+                trackingOFF(ll);
                 reset();
             }
         });
+        /*
+        Adding a listener to a finish button. It stops tracking.
+        creates a bundle with details needed to be shown in new activity,
+        creates new intent, adds bundle and starts UserActivity activity.
+        it also resets all fields and variables , so when a user comes back to MainActivity,
+        all the data has been reset.
+         */
         finishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent showDetails = new Intent(MainActivity.this,UserActivity.class);
-                stopTracking(ll);
+                trackingOFF(ll);
                 Bundle data = new Bundle();
 
                 if(!userActivities.isEmpty()) {
@@ -138,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
                     String userTime = "" + totalTime;
                     data.putString("totalUserTime", userTime);
 
-                    ArrayList<Integer> graphData = getGraphInfo();
-                    data.putIntegerArrayList("graphArray",graphData);
+                    int[] graphData = getGraphInfo();
+                    data.putIntArray("graphArray",graphData);
                 }
 
                 reset();
@@ -149,7 +181,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-    public void reset(){
+    /*
+    Resets all fields and variables. Clears a list of UserActivities
+     */
+    void reset(){
         working=false;
         resetTextFields();
         cm.stop();
@@ -157,20 +192,33 @@ public class MainActivity extends AppCompatActivity {
         distanceTraveled = 0.0;
         loc = null;
     }
-    public void resetTextFields(){
+    /*
+    Resets all text fields.
+     */
+    void resetTextFields(){
         currentSpeed.setText(R.string.currentSpeed);
         averageSpeed.setText(R.string.averageSpeed);
         distance.setText(R.string.distance);
         cm.setText("00:00");
     }
-    public double getAverageSpeed(){
+    /*
+    Returns average user speed. By traversing the array on UserActivities and then getting
+    the average value of speed.
+     */
+    double getAverageSpeed(){
         double result = 0;
         for(int i=0;i<userActivities.size();i++){
             result = result + userActivities.get(i).getSpeed();
         }
         return result/userActivities.size();
     }
-    public void startTracking(LocationListener temp){
+    /*
+    Starts tracking of user movement. Permissions are checked as this is now the android standard
+    and just having permissions in a manifest file isn't enough.
+    If permissions are off, it prompts the Application user to enable location on the device.
+    If everything is ok, it starts tracking with 1000 milliseconds or 5 meters as params.
+     */
+    void trackingON(LocationListener temp){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             String PERMISSIONS_REQUIRED[] = new String[]{
@@ -184,12 +232,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-    public void stopTracking(LocationListener temp){
+    /*
+    Stops the tracking of user movement
+     */
+    void trackingOFF(LocationListener temp){
         lm.removeUpdates(temp);
     }
-
-    public ArrayList<Integer> getGraphInfo(){
+    /*
+    Returs an array of ints. Each element in the array is the amount of time it took
+    user to complete 1 km. Data gets takes from UserActivities list and then saved into an array.
+    That array is then traversed to get time it took user ti complete each km.
+    */
+     int[] getGraphInfo(){
         ArrayList<Integer> times = new ArrayList<>();
         double distanceCheck = 1000;
         for(int i=0;i<userActivities.size();i++){
@@ -198,9 +252,22 @@ public class MainActivity extends AppCompatActivity {
                 times.add((int) Math.round(userActivities.get(i).getTime()));
             }
         }
-        return times;
-    }
+        int[] graphValues = new int[times.size()];
+        Integer[] tempGraphValues = (Integer[]) times.toArray(new Integer[times.size()]);
 
+        for(int i=0;i<tempGraphValues.length;i++){
+            if(i==0){
+                Integer temp = tempGraphValues[i];
+                graphValues[i] = temp;
+            }
+            else{
+                Integer temp = tempGraphValues[i] - tempGraphValues[i-1];
+                graphValues[i] = temp;
+            }
+        }
+
+        return graphValues;
+    }
     public void onResume() {
         super.onResume();
     }

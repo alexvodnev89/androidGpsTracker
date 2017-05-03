@@ -6,22 +6,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 /**
  * Created by Alexander on 29/04/2017.
+ *
+ * Class that displays a summary of users Activity
  */
 
 public class UserActivity extends Activity {
+    // Variables, Text Fields and a Button
     Button backbtn;
     TextView speedView,distanceView,timeView,graphTextView;
-    ArrayList<Integer> userKmInfo;
     GraphView gv;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.user_details);
+
+        // Initialising Views and a button
         backbtn = (Button)findViewById(R.id.goBack);
         speedView = (TextView)findViewById(R.id.userDetailsSpeed);
         distanceView = (TextView)findViewById(R.id.userDetailsDistance);
@@ -29,20 +31,26 @@ public class UserActivity extends Activity {
         graphTextView = (TextView)findViewById(R.id.graphTextView);
         gv = (GraphView)findViewById(R.id.barChart);
 
+        // Initialising variables
         Bundle data = getIntent().getExtras();
         int speed = data.getInt("averageSpeed");
         String dist = data.getString("distanceStaveled");
         String time = data.getString("totalUserTime");
-        userKmInfo = data.getIntegerArrayList("graphArray");
+        int[] userKmInfo = data.getIntArray("graphArray");
 
+        /*
+        If data.getIntArray returns nothing, create an empty array to prevent any null
+        pointers in the graph custom view later on. Only happens if a user presses Finish button
+        in MainActivity without actually recording any activity before that.
+
+        If list is valid, then an array is passed to the Custom View
+        */
         if(userKmInfo != null) {
-            Integer[] dataArray = (Integer[]) userKmInfo.toArray(new Integer[userKmInfo.size()]);
-            gv.setCoordinates(dataArray);
+            gv.setCoordinates(userKmInfo);
         }
         else{
-            userKmInfo = new ArrayList<>();
-            Integer[] dataArray = (Integer[]) userKmInfo.toArray(new Integer[userKmInfo.size()]);
-            gv.setCoordinates(dataArray);
+            int[] temp = new int[0];
+            gv.setCoordinates(temp);
         }
 
         if(speed == 0)
@@ -61,6 +69,10 @@ public class UserActivity extends Activity {
         else
             timeView.setText("Total time is: 00:00");
 
+
+        /* A listener added to a button, stops current activity and
+        brings a user back to the MainActivity
+        */
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,4 +81,3 @@ public class UserActivity extends Activity {
         });
     }
 }
-

@@ -2,6 +2,9 @@ package pnzio.gpsassignment;
 
 /**
  * Created by Alexander on 29/04/2017.
+ *
+ * Objects are stored in MainActivity's list.
+ * Each Object is created when a onLocationChanged is called.
  */
 
 public class UserActivityDetails {

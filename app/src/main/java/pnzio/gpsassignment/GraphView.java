@@ -10,31 +10,34 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
+ /*
+    Custom View that displays a Graph with each bar on the graph being a kilometer
+    Gets data from UserActivity passing an array. If Array is empty, empty graph is displayed...
+ */
 
 public class GraphView extends View {
 
+    // Variables
     private Paint paint;
     private Context ctxt;
-    private Integer[] GraphData;
-    private Integer biggestValueInArray;
-    private int textSize = 50;
-    private int numberOfYShown;
-    private int distance;
+    private int[] GraphData;
+    private int biggestValueInArray;
+    private int textSize;
     private int maxYAxisWidth;
 
+    // Constructor
     GraphView(Context context,AttributeSet attrs) {
         super(context, attrs);
+        textSize = 50;
+        biggestValueInArray = 0;
         ctxt = context;
         paint = new Paint();
-        init();
     }
-    private void init() {
-        distance = 50;
-    }
-    public void setCoordinates(Integer[] data) {
+    /* UserActivity calls this function to pass the array of seconds.
+        Sets Text  Width and invalidates.
+     */
+    void setCoordinates(int[] data) {
         GraphData = data;
-        numberOfYShown = 20;
-        biggestValueInArray = 0;
         for(int i=0;i<GraphData.length;i++) {
             if(biggestValueInArray < GraphData[i])
                 biggestValueInArray = GraphData[i];
@@ -42,10 +45,13 @@ public class GraphView extends View {
         setTextWidth(data);
         invalidate();
     }
-    public Integer getMaxValueOfData() {
+    /*
+    Returns biggest value in the array, as that value changes after setCoordinates is called.
+     */
+    int getMaxValueOfData() {
         return biggestValueInArray;
     }
-    private void setTextWidth(Integer[] data) {
+    void setTextWidth(int[] data) {
         Paint paint = new Paint();
         paint.setTypeface(Typeface.DEFAULT);
         paint.setTextSize(textSize);
@@ -55,48 +61,31 @@ public class GraphView extends View {
                 maxYAxisWidth = currentTextWidth;
         }
     }
+    /*
+    Draws the graph itself.
+    Draws X and Y axis, then draws bars.
 
-    public void setXdetails(Point origin, String label, int centerX, Canvas canvas) {
-        Rect bounds = new Rect();
-        paint.getTextBounds(label, 0, label.length(), bounds);
-        int y = origin.y + distance;
-        int x = centerX - bounds.width() / 2;
-        paint.setTextSize(textSize);
-        paint.setTypeface(Typeface.DEFAULT);
-        canvas.drawText(label, x, y, paint);
-    }
-    public void setYdetails(Point origin, int graphHeight, Canvas canvas) {
-        Integer max = (int)getMaxValueOfData();
-        Integer interval = graphHeight / numberOfYShown;
-        Integer dataInterval = max / numberOfYShown;
-        paint.setTypeface(Typeface.DEFAULT);
-        paint.setTextSize(textSize);
-
-        for (int i=0;i< numberOfYShown;i++) {
-            String string = "" +Math.round(max);
-            Rect bounds = new Rect();
-            paint.getTextBounds(string, 0, string.length(), bounds);
-            int y = (int) ((origin.y - graphHeight) + interval *i);
-            canvas.drawLine(origin.x - (distance >> 1), y, origin.x, y, paint);
-            y = y + (bounds.height() >> 1);
-            canvas.drawText(string, origin.x - bounds.width() - distance, y, paint);
-            max = max - dataInterval;
-        }
-    }
-
+    Draws Small Lines on Y axis that correspond to bars. Add labels to them.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         int graphHeight = getHeight() - getPaddingBottom() - getPaddingTop();
         int graphWidth = getWidth() - getPaddingLeft() - getPaddingRight();
-        Point origin = new Point(maxYAxisWidth + distance,getHeight() - getPaddingBottom());
+        Point origin = new Point(maxYAxisWidth + 50,getHeight() - getPaddingBottom());
         paint.setColor(ContextCompat.getColor(ctxt, R.color.darkRed));
         paint.setStrokeWidth(10);
         canvas.drawLine(origin.x, origin.y, origin.x, origin.y - (graphHeight), paint);
         canvas.drawLine(origin.x, origin.y, origin.x + graphWidth -(maxYAxisWidth), origin.y, paint);
         int width = (graphWidth - maxYAxisWidth) / ((GraphData.length << 1) + 1);
         int x1, x2, y1, y2;
-        Integer maxValue = getMaxValueOfData();
+
+        int maxValue = getMaxValueOfData();
+        paint.setTextSize(textSize);
+        paint.setTypeface(Typeface.DEFAULT);
+
+
         for (int i=0; i<GraphData.length;i++) {
+            String string = "" +Math.round(GraphData[i]);
             x1 = origin.x + ((i << 1) + 1) * width;
             x2 = origin.x + ((i << 1) + 2) * width;
             int barHeight = (int) ((graphHeight) *
@@ -104,12 +93,19 @@ public class GraphView extends View {
             y1 = origin.y - barHeight;
             y2 = origin.y;
             canvas.drawRect(x1, y1, x2, y2, paint);
-            if(GraphData.length<=6)
-                setXdetails(origin, "" + GraphData[i], x1 + (x2 - x1) / 2, canvas);
-        }
-        setYdetails(origin, (graphHeight), canvas);
-    }
+            canvas.drawLine(origin.x-20, y1, origin.x+20, y1, paint);
+            Rect bounds = new Rect();
+            paint.getTextBounds(string, 0, string.length(), bounds);
+            canvas.drawText(string,origin.x-bounds.width()-50, y1, paint);
 
+
+
+        }
+    }
+    /*
+    Makes sure that Custom View is square in size by getting parents width and height and
+    making changes accordingly.
+     */
     @Override
     protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec) {
         if(widthMeasureSpec>heightMeasureSpec)
